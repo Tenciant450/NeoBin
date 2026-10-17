@@ -1,0 +1,6 @@
+id=NeoBin
+name=NeoBin
+version=v1.3
+versionCode=4
+author=Tenciant450
+description=近乎全自动的 Termux 环境桥接。\n自动检测 UID 并劫持 apt/pkg，原生运行。\n⚠️ 仅适配Termux及其变种（ZeroTermux等）

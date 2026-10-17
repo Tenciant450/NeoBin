@@ -1,0 +1,11 @@
+#!/system/bin/sh
+MODDIR="${0%/*/*/*}"
+UID_FILE="$MODDIR/uid.conf"
+
+if [ -f "$UID_FILE" ]; then
+    TERMUX_UID=$(cat "$UID_FILE" 2>/dev/null)
+else
+    TERMUX_UID=$(stat -c %u /data/data/com.termux 2>/dev/null)
+fi
+
+su -l "$TERMUX_UID" -G 3003 -c "export PREFIX=/data/data/com.termux/files/usr; export HOME=/data/data/com.termux/files/home; export PATH=\$PREFIX/bin:\$PATH; export LD_LIBRARY_PATH=\$PREFIX/lib:\$LD_LIBRARY_PATH; apt \"\$@\"" -- "$@"
