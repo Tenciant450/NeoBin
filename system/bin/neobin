@@ -1,32 +1,21 @@
 #!/system/bin/sh
-# 自动获取当前模块的根目录 (即 /data/adb/modules/neobin)
-MODDIR="${0%/*/*/*}"
+MODDIR="/data/adb/modules/neobin"
 TERMUX_PREFIX=/data/data/com.termux/files/usr
 CONF_FILE="$MODDIR/uid.conf"
 
-# 1. 自动检测 UID
 if [ -f "$CONF_FILE" ]; then
     TERMUX_UID=$(cat "$CONF_FILE" 2>/dev/null)
 else
     TERMUX_UID=$(stat -c %u /data/data/com.termux 2>/dev/null)
-    [ -n "$TERMUX_UID" ] && echo "$TERMUX_UID" > "$CONF_FILE"
+    [ -n "$TERMUX_UID" ] && echo "$TERMUX_UID" > "$CONF_FILE" 2>/dev/null
 fi
 
-# 2. 注入基础环境
-export PATH=$TERMUX_PREFIX/bin:$PATH
+# 注入基础环境
 export LD_LIBRARY_PATH=$TERMUX_PREFIX/lib:$LD_LIBRARY_PATH
 export PREFIX=$TERMUX_PREFIX
 export HOME=/data/data/com.termux/files/home
 
-# 3. 劫持 apt 和 pkg
-if [ -n "$TERMUX_UID" ]; then
-    apt() {
-        su -l "$TERMUX_UID" -G 3003 -c "export PREFIX=$TERMUX_PREFIX; export HOME=$HOME; export PATH=\$PREFIX/bin:\$PATH; export LD_LIBRARY_PATH=\$PREFIX/lib:\$LD_LIBRARY_PATH; apt \"\$@\"" -- "$@"
-    }
-    pkg() {
-        su -l "$TERMUX_UID" -G 3003 -c "export PREFIX=$TERMUX_PREFIX; export HOME=$HOME; export PATH=\$PREFIX/bin:\$PATH; export LD_LIBRARY_PATH=\$PREFIX/lib:\$LD_LIBRARY_PATH; pkg \"\$@\"" -- "$@"
-    }
-    echo "✅ Neobin 已加载 (UID: $TERMUX_UID)"
-else
-    echo "❌ Neobin: 找不到 Termux。"
-fi
+# 【核心】将模块的 bin 放到最前面，拦截 apt 和 pkg
+export PATH="$MODDIR/system/bin:$PATH:$TERMUX_PREFIX/bin"
+
+echo "✅ Neobin 已加载 (UID: $TERMUX_UID)"

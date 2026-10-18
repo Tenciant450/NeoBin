@@ -1,6 +1,5 @@
 #!/system/bin/sh
-MODDIR="${0%/*/*/*}"
-UID_FILE="$MODDIR/uid.conf"
+UID_FILE="/data/adb/modules/neobin/uid.conf"
 
 if [ -f "$UID_FILE" ]; then
     TERMUX_UID=$(cat "$UID_FILE" 2>/dev/null)
